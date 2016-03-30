@@ -1,0 +1,32 @@
+﻿namespace TelefoneLibrary
+{
+    public enum State
+    {
+        Acre,
+        Alagoas,
+        Amapa,
+        Amazonas,
+        Bahia,
+        Ceara,
+        EspiritoSanto,
+        Goias,
+        Maranhao,
+        MatoGrosso,
+        MatoGrossoDoSul,
+        MinasGerais,
+        Parana,
+        Paraiba,
+        Para,
+        Pernambuco,
+        Piaui,
+        RioGrandeDoNorte,
+        RioGrandeDoSul,
+        RioDeJaneiro,
+        Rondonia,
+        Roraima,
+        SantaCatarina,
+        Sergipe,
+        SaoPaulo,
+        Tocantins,
+    }
+}
