@@ -50,6 +50,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Trim.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Invalid.cs" />
     <Compile Include="Equality.cs" />

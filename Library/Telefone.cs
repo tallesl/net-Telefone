@@ -22,6 +22,9 @@
             if (number == null)
                 throw new ArgumentNullException("number");
 
+            // trim
+            number = number.Trim();
+
             // too short
             if (number.Length < 10)
                 return null;
