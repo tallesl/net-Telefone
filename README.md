@@ -1,3 +1,9 @@
+<p align="center">
+    <a href="#telefone">
+        <img alt="logo" src="Assets/logo-200x200.png">
+    </a>
+</p>
+
 # Telefone
 
 [![][build-img]][build]
