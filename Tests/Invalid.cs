@@ -19,6 +19,8 @@
                 Telefone.Parse("0123456789"),
                 Telefone.Parse("1112345678"),
                 Telefone.Parse("1101234567"),
+                Telefone.Parse("1198765432A"),
+                Telefone.Parse("999999999999"),
             };
 
             phones.ForEach(Assert.IsNull);

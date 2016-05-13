@@ -9,6 +9,8 @@
     /// </summary>
     public static class Telefone
     {
+        private static readonly char[] _valid = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', '-' };
+
         /// <summary>
         /// Parses the given brazilian phone number.
         /// Checks for numbers in the formats
@@ -16,76 +18,110 @@
         /// </summary>
         /// <param name="number">Phone number to parse</param>
         /// <returns>The parsed phone number</returns>
-        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "26 is almost 25.")]
         public static PhoneNumber Parse(string number)
         {
             if (number == null)
                 throw new ArgumentNullException("number");
 
-            // trim
             number = number.Trim();
 
-            // too short
-            if (number.Length < 10)
+            if (TooShort(number))
+                return null;
+
+            if (InvalidChar(number))
                 return null;
             
-            // checking the phone number string
-            if (
+            if (InvalidFormat(number))
+                return null;
+
+            var digits = new string(number.Where(char.IsDigit).ToArray());
+
+            if (InvalidDigits(digits))
+                return null;
+
+            var areaCode = AreaCode(digits);
+
+            var phoneNumber = PhoneNumber(digits);
+
+            if (InvalidPrefix(phoneNumber))
+                return null;
+
+            var landline = Landline(phoneNumber);
+
+            var state = FindState(areaCode);
+
+            if (state == null)
+                return null;
+
+            return new PhoneNumber(areaCode, phoneNumber, landline, state.Value);
+        }
+
+        private static bool TooShort(string number)
+        {
+            return number.Length < 10;
+        }
+
+        private static bool InvalidChar(string number)
+        {
+            return number.Any(c => !_valid.Contains(c));
+        }
+
+        private static bool InvalidFormat(string number)
+        {
+            return
                 // 'AANNNNNNNN'
                 (number.Length != 10) &&
 
                  // 'AA NNNNNNNN'
-                (number.Length != 11 && number[2] != ' ') &&
+                (number.Length != 11 || number[2] != ' ') &&
 
                  // 'AA9NNNNNNNN'
-                (number.Length != 11 && number[2] != '9') &&
+                (number.Length != 11 || number[2] != '9') &&
+
+                 // 'AANNNN-NNNN'
+                (number.Length != 11 || number[6] != '-') &&
 
                  // 'AA NNNN-NNNN'
-                (number.Length != 12 && number[2] != ' ' && number[7] != '-') &&
+                (number.Length != 12 || number[2] != ' ' || number[7] != '-') &&
 
                  // 'AA 9NNNNNNNN'
-                (number.Length != 12 && number[2] != ' ' && number[3] != '9') &&
+                (number.Length != 12 || number[2] != ' ' || number[3] != '9') &&
+
+                 // 'AA9NNNN-NNNN'
+                (number.Length != 12 || number[2] != '9' || number[7] != '-') &&
 
                  // 'AA 9NNNN-NNNN'
-                (number.Length != 13 && number[2] != ' ' && number[3] != '9' && number[8] != '-')
-            )
-                return null;
+                (number.Length != 13 || number[2] != ' ' || number[3] != '9' || number[8] != '-');
+        }
 
-            // striping off the mask
-            var digits = new string(number.Where(char.IsDigit).ToArray());
-
-            // checking the phone number digits
-            if (
+        private static bool InvalidDigits(string digits)
+        {
+            return
                 // 'AANNNNNNNN'
                 (digits.Length != 10) &&
 
                  // 'AA9NNNNNNNN'
-                (digits.Length != 11 && digits[8] != '9')
-            )
-                return null;
+                (digits.Length != 11 || digits[2] != '9');
+        }
 
-            // getting the area code
-            var areaCode = string.Join(string.Empty, digits.Take(2));
+        private static string AreaCode(string digits)
+        {
+            return string.Join(string.Empty, digits.Take(2));
+        }
 
-            // getting the phone number
-            var phoneNumber = string.Join(string.Empty, digits.Skip(2));
+        private static string PhoneNumber(string digits)
+        {
+            return string.Join(string.Empty, digits.Skip(2));
+        }
 
-            // a phone number can't start with '0' or '1'
-            if (phoneNumber.Length == 8 && (phoneNumber[0] == '0' || phoneNumber[0] == '1'))
-                return null;
+        private static bool InvalidPrefix(string phoneNumber)
+        {
+            return phoneNumber.Length == 8 && (phoneNumber[0] == '0' || phoneNumber[0] == '1');
+        }
 
-            // finding out if it's a landline number
-            var landline = phoneNumber[0] >= '2' && phoneNumber[0] <= '5';
-
-            // finding the area code state
-            var state = FindState(areaCode);
-
-            // an invalid area code were found
-            if (state == null)
-                return null;
-
-            // here, take it
-            return new PhoneNumber(areaCode, phoneNumber, landline, state.Value);
+        private static bool Landline(string phoneNumber)
+        {
+            return phoneNumber[0] >= '2' && phoneNumber[0] <= '5';
         }
 
         // https://en.wikipedia.org/wiki/List_of_dialling_codes_in_Brazil
